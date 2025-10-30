@@ -14,7 +14,11 @@
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && nodemon --exec babel-node --extensions .ts,.tsx src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version:patch": "npm version patch && git push && git push --tags",
+    "version:minor": "npm version minor && git push && git push --tags",
+    "version:major": "npm version major && git push && git push --tags",
+    "publish:public": "npm publish --access public"
   },
   "keywords": [
     "express",
