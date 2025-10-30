@@ -9,3 +9,4 @@ user_emails.csv
 .env_STAGING
 docker-compose.yml
 dist
+testPackage

@@ -1,227 +1,157 @@
-# Route Loader for Express
+# 🚀 Project Name
 
-This module provides a flexible way to load and register routes in an Express application from a specified folder. It supports customizable logging and allows for the inclusion of a custom handler for wildcard routes.
+A modular Node.js + Express + TypeScript application with dynamic route loading, clean folder structure, and support for environment-specific configuration.
 
-## Overview
+---
 
-The route loader dynamically imports route files from a specified folder, registers them with an Express app, and handles wildcard routes. It provides options to customize logging and define a handler for unmatched routes.
+## 🧠 Overview
 
-## Function Signature
+This project provides a clean and maintainable architecture for Express-based APIs.  
+It includes:
+- Dynamic automatic route loading using `loadRoutes`
+- Type-safe route definitions with a `RouteHandler` structure
+- Environment-specific configuration handling
+- Centralized error handling and logging via `netwrap`
+- Support for middleware, role-based permissions, and Swagger documentation
 
-```typescript
-export default async (
-  routeFolderName: string,
-  app: Express,
-  servicePrefix?: string,
-  wildcardHandler?: (req: Request, res: Response, next: NextFunction) => void,
-) => { ... };
-```
+---
 
-### Parameters
+## 📂 Folder Structure
 
-- **`routeFolderName`**: The path to the folder containing route files. Each file should export an array of `RouteHandler` objects.
-- **`app`**: The Express application instance where routes will be registered.
-- **`servicePrefix`** (optional): A prefix to prepend to all route paths.
-- **`wildcardHandler`** (optional): A custom handler function for wildcard routes (i.e., routes that do not match any registered routes).
+```bash
+src/
+├── app.ts
+├── constants/
+│   └── urls.ts
+├── controllers/
+│   └── ...
+├── middlewares/
+│   └── ...
+├── routers/
+│   ├── health.ts
+│   └── adminSettings.ts
+├── utils/
+│   └── loadRoutes.ts
+├── types/
+│   └── route.ts
 
-## How It Works
 
-1.  **Validation**: Checks if the provided route folder path is valid. If not, an error is thrown.
-2.  **Route File Import**: Reads all files in the route folder, strips the index file and file extensions, and imports each file.
-3.  **Route Registration**: For each route file, validates that it exports an array of `RouteHandler` objects. Each route is registered with the Express app. Duplicate routes are logged as warnings.
-4.  **Wildcard Route Handling**: A default wildcard route handler is registered to handle any requests that do not match registered routes. If a `wildcardHandler` is provided, it will be used instead of the default handler.
-5.  **Logging**: Logs the loading process and route registrations. The logging behavior can be customized.
+⚙️ How It Works
+🧩 Route Loader (loadRoutes.ts)
+This utility automatically loads all route definition files from your routers/ folder and registers them on the Express app.
 
-## Example Usage
+Each router file exports an array of RouteHandler objects like so:
 
-```typescript
-import express from "express";
-import routeLoader from "@metrobuzz/express-routes-loader";
-
-const app = express();
-const routeFolder = "./routes";
-
-// Custom handler for wildcard routes
-const customWildcardHandler = (req, res) => {
-  res.status(404).json({ message: "Custom Not Found" });
-};
-
-// Load routes with a custom prefix and wildcard handler
-routeLoader(routeFolder, app, "/api", customWildcardHandler)
-  .then(() => {
-    app.listen(3000, () => console.log("Server running on port 3000"));
-  })
-  .catch((err) => console.error(err));
-```
-
-Alternative,
-
-```typescript
-import express from "express";
-import routeLoader from "@metrobuzz/express-routes-loader";
-
-const app = express();
-const routeFolder = "./routes";
-
-// Custom handler for wildcard routes
-const customWildcardHandler = (req, res) => {
-  res.status(404).json({ message: "Custom Not Found" });
-};
-
-const load = async () => {
-  try {
-    await routeLoader(routeFolder, app, "/api", customWildcardHandler);
-    app.listen(3000, () => console.log("Server running on port 3000"));
-  } catch (error) {
-    console.error("Error loading routes:", error);
-  }
-};
-
-load();
-```
-
-## Route File Format
-
-Each file in the `routeFolderName` should export an array of `RouteHandler` objects. Here's a sample structure:
-
-### Folder Structure
-
-```plain
-routes/
-  ├── users.ts
-  ├── products.ts
-  └── orders.ts
-```
-
-### Sample Route Files
-
-#### `routes/users.ts`
-
-```typescript
-import { Request, Response } from "express";
-import { RouteHandler } from "@metrobuzz/express-routes-loader";
-
-// Define route handlers
-const getUsers: RouteHandler = {
-  path: "/users",
-  method: "get",
-  handlers: [
-    (req: Request, res: Response) => {
-      res.json({ message: "List of users" });
-    },
-  ],
-};
-
-const createUser: RouteHandler = {
-  path: "/users",
-  method: "post",
-  handlers: [
-    (req: Request, res: Response) => {
-      res.json({ message: "User created" });
-    },
-  ],
-};
-
-// Export route handlers as an array
-export default [getUsers, createUser];
-```
-
-#### `routes/products.ts`
-
-```typescript
-import { Request, Response } from "express";
-import { RouteHandler } from "@types";
-
-// Define route handlers
-const getProducts: RouteHandler = {
-  path: "/products",
-  method: "get",
-  handlers: [
-    (req: Request, res: Response) => {
-      res.json({ message: "List of products" });
-    },
-  ],
-};
-
-const createProduct: RouteHandler = {
-  path: "/products",
-  method: "post",
-  handlers: [
-    (req: Request, res: Response) => {
-      res.json({ message: "Product created" });
-    },
-  ],
-};
-
-// Export route handlers as an array
-export default [getProducts, createProduct];
-```
-
-#### `routes/orders.ts`
-
-```typescript
-import { Request, Response } from "express";
-import { RouteHandler } from "@types";
-
-// Define route handlers
-const getOrders: RouteHandler = {
-  path: "/orders",
-  method: "get",
-  handlers: [
-    (req: Request, res: Response) => {
-      res.json({ message: "List of orders" });
-    },
-  ],
-};
-
-const createOrder: RouteHandler = {
-  path: "/orders",
-  method: "post",
-  handlers: [
-    (req: Request, res: Response) => {
-      res.json({ message: "Order created" });
-    },
-  ],
-};
-
-// Export route handlers as an array
-export default [getOrders, createOrder];
-```
-
-## Alternative Route Handler Format
-
-Route handlers can also be defined in an alternative format. Here's an example:
-
-```typescript
-import { Request, Response } from "express";
-import { RouteHandler } from "@types";
-
-// Define route handlers
+ 
 const serviceLoader: RouteHandler[] = [
   {
-    path: "/example",
-    method: "get", // get, put, post, patch, delete
-    handlers: [
-      (req: Request, res: Response) => {
-        res.json({ message: "Example route" });
-      },
-    ],
+    path: "/check",
+    method: "get",
+    handlers: [controllers.health.checkServiceHealth],
+  },
+];
+export default serviceLoader;
+
+
+
+loadRoutes handles:
+
+Automatic environment-aware loading (.ts in dev, .js in prod)
+
+Logging of all registered routes
+
+Detection of duplicate routes
+
+404 and 405 (method not allowed) responses
+
+Pretty HTML root endpoint with Swagger link
+
+
+
+
+🧭 Example Usage (in app.ts)
+ import loadRoutes from "./utils/loadRoutes";
+import express from "express";
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+const environ = process.env.NODE_BUILD_ENV || "production";
+const basePath = `/${getters.getAppSecrets().BASEPATH}`;
+const showLogs =false # or true
+loadRoutes("src/routers", app, basePath, environ, undefined, showLogs)
+  .then(async () => {
+    app.listen(port, () => {
+      logger(`✅ Server running on port ${port}`);
+    });
+  })
+  .catch((err) => console.error("Error loading routes:", err));
+
+
+🧱 Defining URLs (constants/urls.ts)
+To keep routes consistent, we define URLs and methods in one place using a routeCreator helper:
+ 
+export const urls = {
+  health: {
+    check: () => routeCreator("check"),
+    encryptData: () => routeCreator("encrypt", "post"),
+    decryptData: () => routeCreator("decrypt", "post"),
+  },
+};
+This ensures your routes and constants remain synchronized.
+
+🧩 Example Router: health.ts
+ 
+import { constants } from "../constants";
+import controllers from "../controllers";
+import { RouteHandler } from "../types/route";
+import { joinUrls } from "../utils";
+
+const serviceLoader: RouteHandler[] = [
+  {
+    path: joinUrls([constants.urls.health.check().path]),
+    method: constants.urls.health.check().method,
+    handlers: [controllers.health.checkServiceHealth],
+  },
+  {
+    path: joinUrls([constants.urls.health.encryptData().path]),
+    method: constants.urls.health.encryptData().method,
+    handlers: [controllers.health.internopayEncryption],
   },
 ];
 
 export default serviceLoader;
-```
 
-### Explanation
 
-1.  **File Structure**: Each file in the `routes` folder represents a module containing route handlers. These files are imported and their default export is expected to be an array of `RouteHandler` objects.
+🧑‍💻 Running the Project
+🏗 Build
+ 
+npm run build
+🚀 Start (Development)
+ 
+npm run dev
+🏁 Start with PM2 (Production)
+ 
+pm2 start pm2system.config.js
+You can set the environment variable:
 
-2.  **RouteHandler Interface**: Each `RouteHandler` object includes:
 
-    - `path`: The route path.
-    - `method`: The HTTP method (e.g., 'get', 'post').
-    - `handlers`: An array of handler functions that handle requests to this route.
+NODE_ENV=staging # or production
 
-3.  **Export**: Each file exports an array of `RouteHandler` objects. This array is dynamically loaded and registered by the route loader function.
 
-This setup allows you to modularize your routes and manage them easily. Each route file is responsible for its own set of routes, making the route configuration clean and maintainable.
+🧰 Environment Variables
+Name	Description	Example
+NODE_BUILD_ENV	Determines if .ts or .js files should be loaded	production
+BASEPATH	Global API prefix	api/v1
+APP_NAME	Application name (displayed on root page)	Netwrap API
+PORT	Port number	3000
+
+🧾 Credits
+Dynamic route loader inspiration: adapted and improved from an open-source implementation by @tylerdgenius/express-routes-loader
+(original concept: auto-register Express routes based on file structure).
+The current version has been rewritten, extended, and optimized for TypeScript and production readiness — including better logging, duplicate detection, wildcard handling, and environment awareness.
+
+🛡 License
+This project is licensed under the MIT License — you are free to use, modify, and distribute it.
+
+ 
