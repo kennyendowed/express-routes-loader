@@ -16,9 +16,9 @@
     "dev": "npm run build && nodemon --exec babel-node --extensions .ts,.tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "version": "npm version patch",
-    "version:patch": "npm version patch && git push && git push --tags",
-    "version:minor": "npm version minor && git push && git push --tags",
-    "version:major": "npm version major && git push && git push --tags",
+  "version:patch": "npm version patch && npm run publish:public",
+  "version:minor": "npm version minor && npm run publish:public",
+  "version:major": "npm version major && npm run publish:public",
     "publish:public": "npm publish --access public"
   },
   "keywords": [

@@ -1,12 +1,12 @@
 import fs from "fs";
 import path from "path";
 import { Express, RequestHandler } from "express";
-import { RouteHandler } from "./types";
+import { RouteHandler } from "../types/route";
 import { logger } from "netwrap";
 
 /**
  * Loads route files from a folder and applies them to the Express app with a specified prefix.
- * 
+ *
  * @param routeFolderName Path to the folder containing route files
  * @param app Express app instance
  * @param servicePrefix Optional route prefix (e.g. /api/v1)
@@ -20,7 +20,7 @@ export default async function loadRoutes(
   servicePrefix = "",
   NODE_BUILD_ENV = "development",
   wildcardHandler?: RequestHandler,
-  hideLogs = false
+  hideLogs = false,
 ): Promise<void> {
   const startTime = Date.now();
   const isDevelopment = NODE_BUILD_ENV || "development";
@@ -41,33 +41,53 @@ export default async function loadRoutes(
         (!file.endsWith(".js") && !file.endsWith(".ts")) ||
         file === "index.ts" ||
         file.endsWith(".d.ts")
-      ) continue;
+      )
+        continue;
 
       const filePath = path.join(routeFolderName, file);
       const modulePrefix = path.basename(file, path.extname(file)); // e.g., "users"
 
       let routes: RouteHandler[] = [];
       try {
-        const requirePath = isDevelopment ? filePath : filePath.replace(".ts", ".js");
+        const requirePath = isDevelopment
+          ? filePath
+          : filePath.replace(".ts", ".js");
         routes = require(requirePath).default;
       } catch (error) {
         if (!hideLogs) {
-          logger(`⚠️ Failed to load route file ${file}: ${(error as Error).message}`);
+          logger(
+            `⚠️ Failed to load route file ${file}: ${(error as Error).message}`,
+          );
         }
         continue;
       }
 
       if (!Array.isArray(routes)) {
         if (!hideLogs) {
-          logger(`⚠️ Invalid route configuration in ${file}. Expected an array of routes.`);
+          logger(
+            `⚠️ Invalid route configuration in ${file}. Expected an array of routes.`,
+          );
         }
         continue;
       }
 
       routes.forEach((route) => {
         const { path: routePath, method, handlers } = route;
+        // safety filter: remove undefined or non-function handlers
+        const safeHandlers = (handlers || []).filter(
+          (h): h is RequestHandler => typeof h === "function",
+        );
         const fullPath = `${servicePrefix}/${modulePrefix}${routePath}`;
         const routeKey = `${method.toUpperCase()} ${fullPath}`;
+        // error if route has no valid callbacks
+        if (safeHandlers.length === 0) {
+          logger(`❌ Invalid handlers for ${method.toUpperCase()} ${fullPath}`);
+          throw new Error(
+            `Route.${method}() requires a callback but got ${JSON.stringify(
+              handlers,
+            )}`,
+          );
+        }
 
         // ✅ Check for duplicate route definitions
         if (registeredRoutes.has(routeKey)) {
@@ -78,7 +98,7 @@ export default async function loadRoutes(
         }
 
         // ✅ Register route
-        app[method](fullPath, ...handlers);
+        app[method as keyof Express](fullPath, ...safeHandlers);
         registeredRoutes.add(routeKey);
 
         if (!hideLogs) {
@@ -104,7 +124,7 @@ export default async function loadRoutes(
             })) || [];
 
         const matchingRoute = availableRoutes.find(
-          (route: { path: string }) => route.path === requestedPath
+          (route: { path: string }) => route.path === requestedPath,
         );
 
         if (matchingRoute) {
@@ -118,9 +138,12 @@ export default async function loadRoutes(
 
         // ✅ Handle root "/" route gracefully
         if (requestedPath === "/") {
-          const baseUrl = `${req.protocol}://${req.get("host")}${servicePrefix}`;
+          const baseUrl = `${req.protocol}://${req.get(
+            "host",
+          )}${servicePrefix}`;
           const swaggerUrl = `${baseUrl}/api-docs`;
-          const appName = process.env.APP_NAME || servicePrefix || "Netwrap Service";
+          const appName =
+            process.env.APP_NAME || servicePrefix || "Netwrap Service";
           const version = process.env.npm_package_version || "1.0.0";
           const env = process.env.NODE_ENV || "development";
 
@@ -200,6 +223,7 @@ export default async function loadRoutes(
       logger(`✅ Loaded routes in ${duration}ms`);
     }
   } catch (error) {
+    
     logger(`❌ Failed to load routes: ${(error as Error).message}`);
   }
 }
