@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Express, RequestHandler } from "express";
-import { RouteHandler } from "../types/route";
+import { RouteHandler } from "./types";
 import { logger } from "netwrap";
 
 /**
