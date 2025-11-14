@@ -1,6 +1,6 @@
 {
   "name": "niggamomentrouter",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "A custom routing package for Express with TypeScript support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,9 +16,9 @@
     "dev": "npm run build && nodemon --exec babel-node --extensions .ts,.tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "version": "npm version patch",
-  "version:patch": "npm version patch && npm run publish:public",
-  "version:minor": "npm version minor && npm run publish:public",
-  "version:major": "npm version major && npm run publish:public",
+    "version:patch": "npm version patch && npm run publish:public",
+    "version:minor": "npm version minor && npm run publish:public",
+    "version:major": "npm version major && npm run publish:public",
     "publish:public": "npm publish --access public"
   },
   "keywords": [
