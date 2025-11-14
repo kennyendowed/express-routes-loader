@@ -20,6 +20,16 @@
     "outDir": "./dist",  // or your preferred directory
 "rootDir": "./src",  
   },
-   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+   
+ "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "example-routes",        // ← EXCLUDE THIS
+    "src/test-routes",           // ← AND THIS
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }
