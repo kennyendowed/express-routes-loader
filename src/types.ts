@@ -7,3 +7,14 @@ export type RouteHandler = {
   method: HttpMethod;
   handlers: RequestHandler[];
 };
+export type LoadedRouteModule = {
+  prefix: string;
+  routes: RouteHandler[];
+}
+
+export type LoadRouteOptions = {
+  prefix?: string;
+  env?: string;
+  wildcardHandler?: RequestHandler;
+  hideLogs?: boolean;
+}

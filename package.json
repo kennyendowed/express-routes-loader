@@ -34,6 +34,14 @@
     "RESTful",
     "niggamomentrouter"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kennyendowed/express-routes-loader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kennyendowed/express-routes-loader/issues"
+  },
+  "homepage": "https://github.com/kennyendowed/express-routes-loader#readme",
   "author": "kenneth akpan",
   "license": "ISC",
   "dependencies": {
