@@ -19,7 +19,7 @@
     "version:patch": "npm version patch && npm run publish:public",
     "version:minor": "npm version minor && npm run publish:public",
     "version:major": "npm version major && npm run publish:public",
-    "publish:public": "npm publish --access public"
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "express",
